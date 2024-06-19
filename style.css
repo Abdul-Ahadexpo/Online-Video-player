@@ -1,0 +1,124 @@
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #ffcccb, #ffe4e1, #ffb6c1);
+  font-family: 'Arial', sans-serif;
+  animation: gradientAnimation 15s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.non {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+}
+
+.non video {
+  width: 80%;
+  max-width: 800px;
+  height: auto;
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s, box-shadow 0.3s;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.non video:hover {
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+  transform: scale(1.1);
+}
+
+.non video:active {
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.9);
+}
+
+.upload-container {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#uploadButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 2px solid #ffb6c1;
+  background-color: #ffe4e1;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+#uploadButton:hover {
+  background-color: #ffcccb;
+}
+
+#videoUpload {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 2px solid #ffb6c1;
+  background-color: #ffe4e1;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#videoUpload:hover {
+  background-color: #ffcccb;
+}
+
+.manual-link {
+  text-align: center;
+  margin-top: 80px;
+  animation: fadeInUp 1s ease;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cute-button {
+  padding: 10px 20px;
+  font-size: 15px;
+  border-radius: 20px;
+  border: none;
+  background-color: #fdc0bf;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.cute-button:hover {
+  background-color: #ffb6c1;
+  transform: scale(1.1);
+}

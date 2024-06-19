@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Player Site</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="non">
+    <video
+      id="videoPlayer"
+      controls
+      autoplay
+      loop
+      src="Live Wallpaper Japanese Autumn Leaves.mp4"
+    ></video>
+  </div>
+  <div class="upload-container">
+    <input type="file" id="videoUpload" accept="video/*">
+    <button id="uploadButton">Upload Video</button>
+  </div>
+  
+  <!-- Cute button to view Instruction Manual -->
+  <div class="manual-link">
+    <a href="Instruction Manual.md" target="_blank">
+      <button class="cute-button">View Instruction Manual</button>
+    </a>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
