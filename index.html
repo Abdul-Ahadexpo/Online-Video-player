@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Video Player</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="non">
+      <video id="videoPlayer" controls autoplay loop></video>
+    </div>
+    <div class="upload-container">
+      <label for="videoUpload">Upload Video:</label>
+      <input type="file" id="videoUpload" accept="video/*" />
+      <button id="uploadButton">Upload Video</button>
+    </div>
+
+    <!-- Dropdown to select default videos -->
+    <div class="default-videos">
+      <label for="defaultVideoSelect">Choose an Intarnel Video:</label>
+      <select id="defaultVideoSelect" onchange="changeDefaultVideo()">
+        <option value="Live Wallpaper Japanese Autumn Leaves-(1080p60).mp4">
+          Japanese Autumn Leaves
+        </option>
+        <option value="Mui Goku live wallpaper(1080p).mp4">
+          Mui Goku live wallpaper
+        </option>
+        <option value="forest stream wallpaper-(1080p60).mp4">
+          forest stream
+        </option>
+        <option value="Japanese Living Room. live wallpaper-(1080p60).mp4">
+          Japanese Living Room
+        </option>
+
+        <option value="Cyber Samurai (1080p60).mp4">Cyber Samurai</option>
+
+        <option value="Stars Sky -(1080p).mp4">Stars Sky</option>
+        <option value="Storm for Live Wallpaper-(1080p).mp4">Storm</option>
+        <!-- Add more options as needed -->
+      </select>
+    </div>
+
+    <!-- Cute button to view Instruction Manual -->
+    <div class="manual-link">
+      <a href="README.md" target="_blank">
+        <button class="cute-button">View Instruction Manual</button>
+      </a>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
