@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MediaFile, PlayerState, FavoriteItem } from '../types';
+import { MediaFile, PlayerState, FavoriteItem, HistoryItem } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 
 const defaultPlayerState: PlayerState = {
@@ -15,6 +15,7 @@ const defaultPlayerState: PlayerState = {
 export function useMediaPlayer(defaultMedia: MediaFile[]) {
   const [playerState, setPlayerState] = useLocalStorage<PlayerState>('playerState', defaultPlayerState);
   const [favorites, setFavorites] = useLocalStorage<FavoriteItem[]>('favorites', []);
+  const [history, setHistory] = useLocalStorage<HistoryItem[]>('playHistory', []);
   const [currentMediaInfo, setCurrentMediaInfo] = useState<MediaFile | null>(null);
   const [mediaKey, setMediaKey] = useState(0);
 
@@ -28,7 +29,8 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
   // Update current media info when URL changes
   useEffect(() => {
     const mediaInfo = defaultMedia.find(media => media.url === playerState.currentMedia) ||
-                     favorites.find(fav => fav.url === playerState.currentMedia);
+                     favorites.find(fav => fav.url === playerState.currentMedia) ||
+                     history.find(item => item.url === playerState.currentMedia);
     
     if (mediaInfo) {
       setCurrentMediaInfo({
@@ -48,7 +50,7 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
         type: isAudio ? 'audio' : 'video'
       });
     }
-  }, [playerState.currentMedia, defaultMedia, favorites]);
+  }, [playerState.currentMedia, defaultMedia, favorites, history]);
 
   const updatePlayerState = useCallback((updates: Partial<PlayerState>) => {
     setPlayerState(prev => ({ ...prev, ...updates }));
@@ -58,11 +60,28 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
     updatePlayerState({ currentMedia: mediaUrl });
     setMediaKey(prev => prev + 1);
     
+    // Add to history
+    const mediaInfo = defaultMedia.find(m => m.url === mediaUrl) ||
+                     favorites.find(f => f.url === mediaUrl);
+    
+    if (mediaInfo) {
+      addToHistory(mediaInfo);
+    } else {
+      // For uploaded files
+      const isAudio = mediaType === 'audio' || mediaUrl.match(/\.(mp3|wav|ogg|m4a)$/i);
+      addToHistory({
+        id: `uploaded-${Date.now()}`,
+        name: 'Uploaded File',
+        url: mediaUrl,
+        type: isAudio ? 'audio' : 'video'
+      });
+    }
+    
     // Auto-minimize for audio files on mobile
     if (mediaType === 'audio' && window.innerWidth < 768) {
       updatePlayerState({ isMinimized: true });
     }
-  }, [updatePlayerState]);
+  }, [updatePlayerState, defaultMedia, favorites]);
 
   const toggleMinimized = useCallback(() => {
     updatePlayerState({ isMinimized: !playerState.isMinimized });
@@ -84,6 +103,20 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
     setFavorites(prev => prev.filter(fav => fav.url !== mediaUrl));
   }, [setFavorites]);
 
+  const addToHistory = useCallback((media: MediaFile) => {
+    const historyItem: HistoryItem = {
+      ...media,
+      playedAt: Date.now()
+    };
+    
+    setHistory(prev => {
+      // Remove existing entry if it exists
+      const filtered = prev.filter(item => item.url !== media.url);
+      // Add to beginning and keep only last 10 items
+      return [historyItem, ...filtered].slice(0, 10);
+    });
+  }, [setHistory]);
+
   const toggleDarkMode = useCallback(() => {
     updatePlayerState({ isDarkMode: !playerState.isDarkMode });
   }, [playerState.isDarkMode, updatePlayerState]);
@@ -98,12 +131,14 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
     playerState,
     currentMediaInfo,
     favorites,
+    history,
     mediaKey,
     updatePlayerState,
     changeMedia,
     toggleMinimized,
     addToFavorites,
     removeFromFavorites,
+    addToHistory,
     toggleDarkMode,
     toggleBackground
   };

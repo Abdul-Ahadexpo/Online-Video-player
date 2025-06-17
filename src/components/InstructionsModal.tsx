@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Play, Upload, Music, Video, Heart, Palette, Moon } from 'lucide-react';
+import { X, Play, Upload, Music, Video, Heart, Palette, Moon, Clock, Star } from 'lucide-react';
 
 interface InstructionsModalProps {
   isOpen: boolean;
@@ -38,7 +38,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
           <div className="flex items-center justify-between">
             <h2 className={`text-2xl font-bold ${textClass}`}>
               <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                Media Player Guide
+                Doro Player Guide
               </span>
             </h2>
             <button
@@ -62,8 +62,8 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
             <ul className={`space-y-2 ${subtextClass} ml-11`}>
               <li>• Click anywhere on the video/audio player to play/pause</li>
               <li>• Use the control buttons for play, pause, mute, and fullscreen</li>
-              <li>• Videos automatically loop when finished</li>
-              <li>• Your preferences are automatically saved</li>
+              <li>• Videos and audio automatically loop when finished</li>
+              <li>• Your last played media automatically resumes on next visit</li>
             </ul>
           </section>
 
@@ -79,7 +79,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
               <li>• <strong>Drag & Drop:</strong> Simply drag video or audio files into the upload area</li>
               <li>• <strong>Click to Browse:</strong> Click the upload area to select files</li>
               <li>• <strong>Supported Formats:</strong> MP4, WebM, MP3, WAV, and more</li>
-              <li>• Audio files automatically switch to audio mode</li>
+              <li>• Audio files automatically switch to audio mode with timeline controls</li>
             </ul>
           </section>
 
@@ -93,24 +93,26 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
             </div>
             <ul className={`space-y-2 ${subtextClass} ml-11`}>
               <li>• Upload MP3 or other audio files for audio-only playback</li>
+              <li>• Full timeline control with current time and duration display</li>
+              <li>• Skip forward/backward 10 seconds with dedicated buttons</li>
               <li>• Player automatically minimizes on mobile for audio files</li>
               <li>• Use the minimize button to collapse the video player</li>
-              <li>• Audio continues playing when minimized</li>
             </ul>
           </section>
 
-          {/* Video Selection */}
+          {/* Media Library */}
           <section>
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
                 <Video className="w-4 h-4 text-white" />
               </div>
-              <h3 className={`text-xl font-semibold ${textClass}`}>Video Selection</h3>
+              <h3 className={`text-xl font-semibold ${textClass}`}>Media Library</h3>
             </div>
             <ul className={`space-y-2 ${subtextClass} ml-11`}>
-              <li>• Use the dropdown menu to choose from pre-loaded videos</li>
-              <li>• Click any video name to instantly switch</li>
-              <li>• Your last selection is remembered for next visit</li>
+              <li>• <strong>Library Tab:</strong> Access pre-loaded videos and uploaded files</li>
+              <li>• <strong>Favorites Tab:</strong> Save your preferred media for quick access</li>
+              <li>• <strong>Recent Tab:</strong> View your last 10 played files with timestamps</li>
+              <li>• All selections are remembered between sessions</li>
             </ul>
           </section>
 
@@ -120,12 +122,29 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
               <div className="w-8 h-8 bg-gradient-to-r from-red-400 to-pink-500 rounded-lg flex items-center justify-center">
                 <Heart className="w-4 h-4 text-white" />
               </div>
-              <h3 className={`text-xl font-semibold ${textClass}`}>Favorites</h3>
+              <h3 className={`text-xl font-semibold ${textClass}`}>Favorites System</h3>
             </div>
             <ul className={`space-y-2 ${subtextClass} ml-11`}>
-              <li>• Click the heart icon to add media to your favorites</li>
-              <li>• Access your favorite files from the favorites section</li>
-              <li>• Favorites are saved locally on your device</li>
+              <li>• Click the heart icon next to any media to add to favorites</li>
+              <li>• Access favorites from the dedicated tab in Media Library</li>
+              <li>• Remove from favorites by clicking the filled heart icon</li>
+              <li>• Favorites persist across browser sessions</li>
+            </ul>
+          </section>
+
+          {/* History */}
+          <section>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center">
+                <Clock className="w-4 h-4 text-white" />
+              </div>
+              <h3 className={`text-xl font-semibold ${textClass}`}>Playback History</h3>
+            </div>
+            <ul className={`space-y-2 ${subtextClass} ml-11`}>
+              <li>• Automatically tracks your last 10 played media files</li>
+              <li>• Shows when each file was last played (e.g., "2h ago")</li>
+              <li>• Click any history item to instantly resume playback</li>
+              <li>• History is preserved between browser sessions</li>
             </ul>
           </section>
 
@@ -138,9 +157,26 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
               <h3 className={`text-xl font-semibold ${textClass}`}>Customization</h3>
             </div>
             <ul className={`space-y-2 ${subtextClass} ml-11`}>
-              <li>• Toggle between animated and static backgrounds</li>
+              <li>• Toggle between animated floating shapes and static backgrounds</li>
               <li>• Switch between light and dark modes</li>
-              <li>• All preferences are automatically saved</li>
+              <li>• All theme preferences are automatically saved</li>
+              <li>• Animated background is the default for enhanced visual experience</li>
+            </ul>
+          </section>
+
+          {/* Persistent Memory */}
+          <section>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
+                <Star className="w-4 h-4 text-white" />
+              </div>
+              <h3 className={`text-xl font-semibold ${textClass}`}>Persistent Memory</h3>
+            </div>
+            <ul className={`space-y-2 ${subtextClass} ml-11`}>
+              <li>• Automatically saves and resumes your last played media</li>
+              <li>• Remembers volume, mute state, and player preferences</li>
+              <li>• Maintains favorites list and playback history</li>
+              <li>• All settings persist across browser sessions</li>
             </ul>
           </section>
 
@@ -163,12 +199,13 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
           {/* Mobile Tips */}
           <section>
             <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded-2xl p-4">
-              <h4 className={`font-semibold ${textClass} mb-2`}>📱 Mobile Tips</h4>
+              <h4 className={`font-semibold ${textClass} mb-2`}>📱 Mobile Experience</h4>
               <ul className={`space-y-1 text-sm ${subtextClass}`}>
                 <li>• Tap to play/pause on mobile devices</li>
                 <li>• Audio files automatically minimize the player on small screens</li>
                 <li>• All controls are touch-friendly and accessible</li>
                 <li>• Swipe gestures work in fullscreen mode</li>
+                <li>• Timeline controls adapt perfectly to mobile screens</li>
               </ul>
             </div>
           </section>
@@ -176,7 +213,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ isOpen, onClose, 
 
         <div className="p-6 border-t border-gray-200/20">
           <p className={`text-center text-sm ${subtextClass}`}>
-            Enjoy your beautiful media player experience! ✨
+            Your personal media center that remembers everything! ✨
           </p>
         </div>
       </div>

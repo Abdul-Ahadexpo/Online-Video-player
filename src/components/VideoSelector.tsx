@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ChevronDown, Video, Music, Heart, HeartOff } from 'lucide-react';
-import { MediaFile, FavoriteItem } from '../types';
+import { ChevronDown, Video, Music, Heart, HeartOff, Clock, Star } from 'lucide-react';
+import { MediaFile, FavoriteItem, HistoryItem } from '../types';
 
 interface VideoSelectorProps {
   videos: MediaFile[];
   favorites: FavoriteItem[];
+  history: HistoryItem[];
   onVideoSelect: (url: string, type?: 'video' | 'audio') => void;
   onAddToFavorites: (media: MediaFile) => void;
   onRemoveFromFavorites: (url: string) => void;
@@ -15,6 +16,7 @@ interface VideoSelectorProps {
 const VideoSelector: React.FC<VideoSelectorProps> = ({ 
   videos, 
   favorites,
+  history,
   onVideoSelect, 
   onAddToFavorites,
   onRemoveFromFavorites,
@@ -22,12 +24,12 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
   isDarkMode = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'videos' | 'favorites'>('videos');
+  const [activeTab, setActiveTab] = useState<'videos' | 'favorites' | 'history'>('videos');
   
-  const allMedia = [...videos, ...favorites];
+  const allMedia = [...videos, ...favorites, ...history];
   const currentMediaName = allMedia.find(media => media.url === currentVideo)?.name || 'Select Media';
 
-  const handleMediaSelect = (media: MediaFile | FavoriteItem) => {
+  const handleMediaSelect = (media: MediaFile | FavoriteItem | HistoryItem) => {
     onVideoSelect(media.url, media.type);
     setIsOpen(false);
   };
@@ -45,6 +47,19 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
 
   const isFavorite = (url: string) => favorites.some(fav => fav.url === url);
 
+  const formatTimeAgo = (timestamp: number) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    if (minutes > 0) return `${minutes}m ago`;
+    return 'Just now';
+  };
+
   const bgClass = isDarkMode ? 'bg-gray-800/60' : 'bg-white/60';
   const textClass = isDarkMode ? 'text-white' : 'text-gray-800';
   const subtextClass = isDarkMode ? 'text-gray-300' : 'text-gray-600';
@@ -58,7 +73,7 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
         <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-500 rounded-lg flex items-center justify-center">
           <Video className="w-4 h-4 text-white" />
         </div>
-        <h3 className={`text-lg font-semibold ${textClass}`}>Choose Media</h3>
+        <h3 className={`text-lg font-semibold ${textClass}`}>Media Library</h3>
       </div>
 
       <div className="relative">
@@ -97,6 +112,16 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
                 }`}
               >
                 Favorites ({favorites.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors duration-200 ${
+                  activeTab === 'history' 
+                    ? 'text-purple-600 border-b-2 border-purple-600' 
+                    : subtextClass
+                }`}
+              >
+                Recent ({history.length})
               </button>
             </div>
 
@@ -144,7 +169,7 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
                 <>
                   {favorites.length === 0 ? (
                     <div className={`px-4 py-8 text-center ${subtextClass}`}>
-                      <Heart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <Star className="w-8 h-8 mx-auto mb-2 opacity-50" />
                       <p>No favorites yet</p>
                       <p className="text-xs mt-1">Add media to favorites from the Library tab</p>
                     </div>
@@ -178,6 +203,45 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
                           >
                             <Heart className="w-4 h-4 text-red-500 fill-current" />
                           </button>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </>
+              )}
+
+              {activeTab === 'history' && (
+                <>
+                  {history.length === 0 ? (
+                    <div className={`px-4 py-8 text-center ${subtextClass}`}>
+                      <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>No recent media</p>
+                      <p className="text-xs mt-1">Your recently played files will appear here</p>
+                    </div>
+                  ) : (
+                    history.map((item, index) => (
+                      <button
+                        key={`${item.id}-${item.playedAt}`}
+                        onClick={() => handleMediaSelect(item)}
+                        className={`w-full px-4 py-3 text-left ${hoverClass} transition-colors duration-200 ${
+                          item.url === currentVideo ? activeClass : textClass
+                        } ${index !== history.length - 1 ? 'border-b border-gray-100/20' : ''}`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full opacity-60" />
+                          <div className="flex items-center space-x-2 flex-1 min-w-0">
+                            {item.type === 'audio' ? (
+                              <Music className="w-4 h-4 text-pink-500 flex-shrink-0" />
+                            ) : (
+                              <Video className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <span className="truncate block">{item.name}</span>
+                              <span className={`text-xs ${subtextClass}`}>
+                                {formatTimeAgo(item.playedAt)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </button>
                     ))

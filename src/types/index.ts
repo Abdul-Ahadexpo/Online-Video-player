@@ -23,3 +23,12 @@ export interface FavoriteItem {
   type: 'video' | 'audio';
   addedAt: number;
 }
+
+export interface HistoryItem {
+  id: string;
+  name: string;
+  url: string;
+  type: 'video' | 'audio';
+  playedAt: number;
+  duration?: number;
+}

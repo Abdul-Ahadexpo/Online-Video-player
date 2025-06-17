@@ -37,6 +37,7 @@ function App() {
     playerState,
     currentMediaInfo,
     favorites,
+    history,
     mediaKey,
     updatePlayerState,
     changeMedia,
@@ -58,6 +59,19 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [playerState.isDarkMode]);
+
+  // Auto-play last media on load
+  useEffect(() => {
+    if (playerState.currentMedia && currentMediaInfo) {
+      // Auto-play the saved media
+      setIsPlaying(true);
+      
+      // Auto-minimize for audio files
+      if (currentMediaInfo.type === 'audio' && window.innerWidth < 768) {
+        updatePlayerState({ isMinimized: true });
+      }
+    }
+  }, [playerState.currentMedia, currentMediaInfo, updatePlayerState]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -123,7 +137,7 @@ function App() {
           <p className={`text-sm lg:text-base max-w-2xl mx-auto transition-colors duration-300 ${
             playerState.isDarkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            Experience videos and audio like never before with our beautiful, responsive player
+            Your personal media center with persistent memory and advanced library features
           </p>
         </header>
 
@@ -169,6 +183,7 @@ function App() {
               <VideoSelector 
                 videos={defaultVideos}
                 favorites={favorites}
+                history={history}
                 onVideoSelect={changeMedia}
                 onAddToFavorites={addToFavorites}
                 onRemoveFromFavorites={removeFromFavorites}
