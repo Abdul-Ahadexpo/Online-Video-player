@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { ChevronDown, Video, Music, Heart, HeartOff, Clock, Star } from 'lucide-react';
+import { ChevronDown, Video, Music, Heart, HeartOff, Clock, Star, Upload } from 'lucide-react';
 import { MediaFile, FavoriteItem, HistoryItem } from '../types';
 
 interface VideoSelectorProps {
   videos: MediaFile[];
+  uploadedFiles: MediaFile[];
   favorites: FavoriteItem[];
   history: HistoryItem[];
   onVideoSelect: (url: string, type?: 'video' | 'audio') => void;
@@ -15,6 +16,7 @@ interface VideoSelectorProps {
 
 const VideoSelector: React.FC<VideoSelectorProps> = ({ 
   videos, 
+  uploadedFiles,
   favorites,
   history,
   onVideoSelect, 
@@ -24,9 +26,9 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
   isDarkMode = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'videos' | 'favorites' | 'history'>('videos');
+  const [activeTab, setActiveTab] = useState<'videos' | 'uploads' | 'favorites' | 'history'>('videos');
   
-  const allMedia = [...videos, ...favorites, ...history];
+  const allMedia = [...videos, ...uploadedFiles, ...favorites, ...history];
   const currentMediaName = allMedia.find(media => media.url === currentVideo)?.name || 'Select Media';
 
   const handleMediaSelect = (media: MediaFile | FavoriteItem | HistoryItem) => {
@@ -95,7 +97,7 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
             <div className="flex border-b border-gray-200/20">
               <button
                 onClick={() => setActiveTab('videos')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors duration-200 ${
+                className={`flex-1 px-3 py-3 text-sm font-medium transition-colors duration-200 ${
                   activeTab === 'videos' 
                     ? 'text-purple-600 border-b-2 border-purple-600' 
                     : subtextClass
@@ -104,8 +106,18 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
                 Library ({videos.length})
               </button>
               <button
+                onClick={() => setActiveTab('uploads')}
+                className={`flex-1 px-3 py-3 text-sm font-medium transition-colors duration-200 ${
+                  activeTab === 'uploads' 
+                    ? 'text-purple-600 border-b-2 border-purple-600' 
+                    : subtextClass
+                }`}
+              >
+                Uploads ({uploadedFiles.length})
+              </button>
+              <button
                 onClick={() => setActiveTab('favorites')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors duration-200 ${
+                className={`flex-1 px-3 py-3 text-sm font-medium transition-colors duration-200 ${
                   activeTab === 'favorites' 
                     ? 'text-purple-600 border-b-2 border-purple-600' 
                     : subtextClass
@@ -115,7 +127,7 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
               </button>
               <button
                 onClick={() => setActiveTab('history')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors duration-200 ${
+                className={`flex-1 px-3 py-3 text-sm font-medium transition-colors duration-200 ${
                   activeTab === 'history' 
                     ? 'text-purple-600 border-b-2 border-purple-600' 
                     : subtextClass
@@ -165,13 +177,59 @@ const VideoSelector: React.FC<VideoSelectorProps> = ({
                 </>
               )}
 
+              {activeTab === 'uploads' && (
+                <>
+                  {uploadedFiles.length === 0 ? (
+                    <div className={`px-4 py-8 text-center ${subtextClass}`}>
+                      <Upload className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>No uploaded files</p>
+                      <p className="text-xs mt-1">Upload media files to see them here</p>
+                    </div>
+                  ) : (
+                    uploadedFiles.map((file, index) => (
+                      <button
+                        key={file.id}
+                        onClick={() => handleMediaSelect(file)}
+                        className={`w-full px-4 py-3 text-left ${hoverClass} transition-colors duration-200 ${
+                          file.url === currentVideo ? activeClass : textClass
+                        } ${index !== uploadedFiles.length - 1 ? 'border-b border-gray-100/20' : ''}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-blue-400 rounded-full opacity-60" />
+                            <div className="flex items-center space-x-2 flex-1 min-w-0">
+                              {file.type === 'audio' ? (
+                                <Music className="w-4 h-4 text-pink-500 flex-shrink-0" />
+                              ) : (
+                                <Video className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                              )}
+                              <span className="truncate">{file.name}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => handleFavoriteToggle(file, e)}
+                            className="p-1 hover:bg-white/20 rounded transition-colors duration-200"
+                          >
+                            {isFavorite(file.url) ? (
+                              <Heart className="w-4 h-4 text-red-500 fill-current" />
+                            ) : (
+                              <HeartOff className="w-4 h-4 text-gray-400" />
+                            )}
+                          </button>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </>
+              )}
+
               {activeTab === 'favorites' && (
                 <>
                   {favorites.length === 0 ? (
                     <div className={`px-4 py-8 text-center ${subtextClass}`}>
                       <Star className="w-8 h-8 mx-auto mb-2 opacity-50" />
                       <p>No favorites yet</p>
-                      <p className="text-xs mt-1">Add media to favorites from the Library tab</p>
+                      <p className="text-xs mt-1">Add media to favorites from other tabs</p>
                     </div>
                   ) : (
                     favorites.map((favorite, index) => (

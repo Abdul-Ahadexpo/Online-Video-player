@@ -13,22 +13,26 @@ const defaultPlayerState: PlayerState = {
 };
 
 export function useMediaPlayer(defaultMedia: MediaFile[]) {
-  const [playerState, setPlayerState] = useLocalStorage<PlayerState>('playerState', defaultPlayerState);
-  const [favorites, setFavorites] = useLocalStorage<FavoriteItem[]>('favorites', []);
-  const [history, setHistory] = useLocalStorage<HistoryItem[]>('playHistory', []);
+  const [playerState, setPlayerState] = useLocalStorage<PlayerState>('doro-player-state', defaultPlayerState);
+  const [favorites, setFavorites] = useLocalStorage<FavoriteItem[]>('doro-player-favorites', []);
+  const [history, setHistory] = useLocalStorage<HistoryItem[]>('doro-player-history', []);
+  const [uploadedFiles, setUploadedFiles] = useLocalStorage<MediaFile[]>('doro-player-uploads', []);
   const [currentMediaInfo, setCurrentMediaInfo] = useState<MediaFile | null>(null);
   const [mediaKey, setMediaKey] = useState(0);
 
+  // Combine all media sources
+  const allMediaSources = [...defaultMedia, ...uploadedFiles];
+
   // Initialize with saved state or default
   useEffect(() => {
-    if (!playerState.currentMedia && defaultMedia.length > 0) {
-      setPlayerState(prev => ({ ...prev, currentMedia: defaultMedia[0].url }));
+    if (!playerState.currentMedia && allMediaSources.length > 0) {
+      setPlayerState(prev => ({ ...prev, currentMedia: allMediaSources[0].url }));
     }
-  }, [defaultMedia, playerState.currentMedia, setPlayerState]);
+  }, [allMediaSources, playerState.currentMedia, setPlayerState]);
 
   // Update current media info when URL changes
   useEffect(() => {
-    const mediaInfo = defaultMedia.find(media => media.url === playerState.currentMedia) ||
+    const mediaInfo = allMediaSources.find(media => media.url === playerState.currentMedia) ||
                      favorites.find(fav => fav.url === playerState.currentMedia) ||
                      history.find(item => item.url === playerState.currentMedia);
     
@@ -42,7 +46,7 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
     } else if (playerState.currentMedia) {
       // For uploaded files, try to determine type from URL
       const isAudio = playerState.currentMedia.includes('audio') || 
-                     playerState.currentMedia.match(/\.(mp3|wav|ogg|m4a)$/i);
+                     playerState.currentMedia.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i);
       setCurrentMediaInfo({
         id: 'uploaded',
         name: 'Uploaded File',
@@ -50,10 +54,35 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
         type: isAudio ? 'audio' : 'video'
       });
     }
-  }, [playerState.currentMedia, defaultMedia, favorites, history]);
+  }, [playerState.currentMedia, allMediaSources, favorites, history]);
+
+  // Save player state changes to localStorage
+  useEffect(() => {
+    const saveState = () => {
+      try {
+        localStorage.setItem('doro-player-state', JSON.stringify(playerState));
+        localStorage.setItem('doro-player-favorites', JSON.stringify(favorites));
+        localStorage.setItem('doro-player-history', JSON.stringify(history));
+        localStorage.setItem('doro-player-uploads', JSON.stringify(uploadedFiles));
+      } catch (error) {
+        console.error('Failed to save to localStorage:', error);
+      }
+    };
+
+    saveState();
+  }, [playerState, favorites, history, uploadedFiles]);
 
   const updatePlayerState = useCallback((updates: Partial<PlayerState>) => {
-    setPlayerState(prev => ({ ...prev, ...updates }));
+    setPlayerState(prev => {
+      const newState = { ...prev, ...updates };
+      // Immediately save to localStorage
+      try {
+        localStorage.setItem('doro-player-state', JSON.stringify(newState));
+      } catch (error) {
+        console.error('Failed to save player state:', error);
+      }
+      return newState;
+    });
   }, [setPlayerState]);
 
   const changeMedia = useCallback((mediaUrl: string, mediaType?: 'video' | 'audio') => {
@@ -61,27 +90,43 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
     setMediaKey(prev => prev + 1);
     
     // Add to history
-    const mediaInfo = defaultMedia.find(m => m.url === mediaUrl) ||
+    const mediaInfo = allMediaSources.find(m => m.url === mediaUrl) ||
                      favorites.find(f => f.url === mediaUrl);
     
     if (mediaInfo) {
       addToHistory(mediaInfo);
     } else {
       // For uploaded files
-      const isAudio = mediaType === 'audio' || mediaUrl.match(/\.(mp3|wav|ogg|m4a)$/i);
-      addToHistory({
+      const isAudio = mediaType === 'audio' || mediaUrl.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i);
+      const uploadedMedia: MediaFile = {
         id: `uploaded-${Date.now()}`,
         name: 'Uploaded File',
         url: mediaUrl,
         type: isAudio ? 'audio' : 'video'
+      };
+      
+      // Add to uploaded files list
+      setUploadedFiles(prev => {
+        const exists = prev.find(file => file.url === mediaUrl);
+        if (exists) return prev;
+        const newUploads = [...prev, uploadedMedia];
+        // Save immediately
+        try {
+          localStorage.setItem('doro-player-uploads', JSON.stringify(newUploads));
+        } catch (error) {
+          console.error('Failed to save uploaded files:', error);
+        }
+        return newUploads;
       });
+      
+      addToHistory(uploadedMedia);
     }
     
     // Auto-minimize for audio files on mobile
     if (mediaType === 'audio' && window.innerWidth < 768) {
       updatePlayerState({ isMinimized: true });
     }
-  }, [updatePlayerState, defaultMedia, favorites]);
+  }, [updatePlayerState, allMediaSources, favorites, setUploadedFiles]);
 
   const toggleMinimized = useCallback(() => {
     updatePlayerState({ isMinimized: !playerState.isMinimized });
@@ -95,12 +140,28 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
     setFavorites(prev => {
       const exists = prev.find(fav => fav.url === media.url);
       if (exists) return prev;
-      return [...prev, newFavorite];
+      const newFavorites = [...prev, newFavorite];
+      // Save immediately
+      try {
+        localStorage.setItem('doro-player-favorites', JSON.stringify(newFavorites));
+      } catch (error) {
+        console.error('Failed to save favorites:', error);
+      }
+      return newFavorites;
     });
   }, [setFavorites]);
 
   const removeFromFavorites = useCallback((mediaUrl: string) => {
-    setFavorites(prev => prev.filter(fav => fav.url !== mediaUrl));
+    setFavorites(prev => {
+      const newFavorites = prev.filter(fav => fav.url !== mediaUrl);
+      // Save immediately
+      try {
+        localStorage.setItem('doro-player-favorites', JSON.stringify(newFavorites));
+      } catch (error) {
+        console.error('Failed to save favorites:', error);
+      }
+      return newFavorites;
+    });
   }, [setFavorites]);
 
   const addToHistory = useCallback((media: MediaFile) => {
@@ -113,7 +174,14 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
       // Remove existing entry if it exists
       const filtered = prev.filter(item => item.url !== media.url);
       // Add to beginning and keep only last 10 items
-      return [historyItem, ...filtered].slice(0, 10);
+      const newHistory = [historyItem, ...filtered].slice(0, 10);
+      // Save immediately
+      try {
+        localStorage.setItem('doro-player-history', JSON.stringify(newHistory));
+      } catch (error) {
+        console.error('Failed to save history:', error);
+      }
+      return newHistory;
     });
   }, [setHistory]);
 
@@ -132,6 +200,8 @@ export function useMediaPlayer(defaultMedia: MediaFile[]) {
     currentMediaInfo,
     favorites,
     history,
+    uploadedFiles,
+    allMediaSources,
     mediaKey,
     updatePlayerState,
     changeMedia,

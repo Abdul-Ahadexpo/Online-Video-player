@@ -26,6 +26,11 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload, isDarkMode 
       setSelectedFile(file);
       const fileType = getFileType(file);
       onFileUpload(file, fileType);
+      
+      // Show success feedback
+      setTimeout(() => {
+        setSelectedFile(null);
+      }, 3000);
     }
   };
 
@@ -101,9 +106,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload, isDarkMode 
           
           {selectedFile ? (
             <div className={`text-sm ${subtextClass}`}>
-              <p className="font-medium text-purple-600 dark:text-purple-400">{selectedFile.name}</p>
+              <p className="font-medium text-green-600 dark:text-green-400">✓ {selectedFile.name}</p>
               <p className="text-xs mt-1">
-                {getFileType(selectedFile) === 'audio' ? '🎵 Audio file' : '🎬 Video file'} • Click to change
+                {getFileType(selectedFile) === 'audio' ? '🎵 Audio uploaded' : '🎬 Video uploaded'} • Saved to library
               </p>
             </div>
           ) : (
@@ -117,6 +122,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload, isDarkMode 
 
       <p className={`text-xs ${subtextClass} mt-3 text-center`}>
         Supports MP4, WebM, MP3, WAV, and other media formats
+        <br />
+        <span className="text-purple-500 dark:text-purple-400">Files are saved to your personal library</span>
       </p>
     </div>
   );

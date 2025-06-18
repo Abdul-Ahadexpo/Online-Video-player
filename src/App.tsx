@@ -8,6 +8,7 @@ import ThemeControls from './components/ThemeControls';
 import CurrentMediaBanner from './components/CurrentMediaBanner';
 import InstructionsModal from './components/InstructionsModal';
 import FloatingShapes from './components/FloatingShapes';
+import FloatingFavoriteButton from './components/FloatingFavoriteButton';
 import { useMediaPlayer } from './hooks/useMediaPlayer';
 import { MediaFile } from './types';
 
@@ -38,6 +39,8 @@ function App() {
     currentMediaInfo,
     favorites,
     history,
+    uploadedFiles,
+    allMediaSources,
     mediaKey,
     updatePlayerState,
     changeMedia,
@@ -105,6 +108,17 @@ function App() {
 
   const handleFileUpload = (file: File, type: 'video' | 'audio') => {
     const fileUrl = URL.createObjectURL(file);
+    // Create a proper filename from the file
+    const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+    
+    // Update the media info with proper name
+    const mediaFile: MediaFile = {
+      id: `upload-${Date.now()}`,
+      name: fileName,
+      url: fileUrl,
+      type: type
+    };
+    
     changeMedia(fileUrl, type);
   };
 
@@ -182,6 +196,7 @@ function App() {
             <div className="lg:col-span-1 order-2 space-y-6">
               <VideoSelector 
                 videos={defaultVideos}
+                uploadedFiles={uploadedFiles}
                 favorites={favorites}
                 history={history}
                 onVideoSelect={changeMedia}
@@ -211,6 +226,15 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Floating Favorite Button */}
+      <FloatingFavoriteButton
+        currentMedia={currentMediaInfo}
+        favorites={favorites}
+        onAddToFavorites={addToFavorites}
+        onRemoveFromFavorites={removeFromFavorites}
+        isDarkMode={playerState.isDarkMode}
+      />
 
       {/* Instructions Modal */}
       <InstructionsModal
